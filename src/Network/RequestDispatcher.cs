@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -17,9 +18,10 @@ namespace StatsigShared.Network
         public string Key { get; }
         public string ApiBaseUrl { get; }
         public IReadOnlyDictionary<string, string> AdditionalHeaders { get; }
+
         public RequestDispatcher(
-            string key, 
-            string? apiBaseUrl = null, 
+            string key,
+            string? apiBaseUrl = null,
             IReadOnlyDictionary<string, string>? headers = null
         )
         {
@@ -27,8 +29,8 @@ namespace StatsigShared.Network
             {
                 throw new ArgumentException("Key cannot be empty.", "key");
             }
-            ApiBaseUrl = string.IsNullOrWhiteSpace(apiBaseUrl) ? 
-                Constants.DEFAULT_API_URL_BASE : apiBaseUrl!;
+
+            ApiBaseUrl = string.IsNullOrWhiteSpace(apiBaseUrl) ? Constants.DEFAULT_API_URL_BASE : apiBaseUrl!;
             Key = key;
             AdditionalHeaders = headers ?? new Dictionary<string, string>();
 
@@ -39,7 +41,34 @@ namespace StatsigShared.Network
             defaultSerializer = JsonSerializer.CreateDefault(jsonSettings);
         }
 
-        public async Task<IReadOnlyDictionary<string, JToken>?> Fetch(
+        public async Task<string> FetchAsString(
+            string endpoint,
+            IReadOnlyDictionary<string, object> body,
+            int retries = 0,
+            int backoff = 1,
+            int timeoutInMs = 0)
+        {
+            var response = await Fetch(endpoint, body, retries, backoff, timeoutInMs);
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        public async Task<IReadOnlyDictionary<string, JToken>?> FetchAsDictionary(
+            string endpoint,
+            IReadOnlyDictionary<string, object> body,
+            int retries = 0,
+            int backoff = 1,
+            int timeoutInMs = 0)
+        {
+            var response = await Fetch(endpoint, body, retries, backoff, timeoutInMs);
+            var stream = await response.Content.ReadAsStreamAsync();
+            using (var reader = new StreamReader(stream))
+            {
+                var jsonReader = new JsonTextReader(reader);
+                return defaultSerializer.Deserialize<Dictionary<string, JToken>>(jsonReader);
+            }
+        }
+
+        private async Task<HttpResponseMessage> Fetch(
             string endpoint,
             IReadOnlyDictionary<string, object> body,
             int retries = 0,
@@ -61,42 +90,43 @@ namespace StatsigShared.Network
                     {
                         request.Headers.Add(kv.Key, kv.Value);
                     }
+
                     if (timeoutInMs > 0)
                     {
                         client.Timeout = TimeSpan.FromMilliseconds(timeoutInMs);
                     }
-                
+
                     var response = await client.SendAsync(request);
                     if (response == null)
                     {
                         return null;
                     }
+
                     if ((int)response.StatusCode >= 200 && (int)response.StatusCode < 300)
                     {
-                        var stream = await response.Content.ReadAsStreamAsync();
-                        using (var reader = new StreamReader(stream))
-                        {
-                            var jsonReader = new JsonTextReader(reader);
-                            return defaultSerializer.Deserialize<Dictionary<string, JToken>>(jsonReader);
-                        }
+                        return response;
                     }
-                    else if (retries > 0 && retryCodes.Contains((int)response.StatusCode))
+                    
+                    if (retries > 0 && retryCodes.Contains((int)response.StatusCode))
                     {
-                        return await retry(endpoint, body, retries, backoff);
+                        return await Retry(endpoint, body, retries, backoff);
                     }
                 }
+
+                return null;
             }
             catch (Exception)
             {
                 if (retries > 0)
                 {
-                    return await retry(endpoint, body, retries, backoff);
+                    return await Retry(endpoint, body, retries, backoff);
                 }
             }
+
             return null;
         }
 
-        private async Task<IReadOnlyDictionary<string, JToken>?> retry(
+        private async Task<HttpResponseMessage> Retry(
             string endpoint,
             IReadOnlyDictionary<string, object> body,
             int retries = 0,

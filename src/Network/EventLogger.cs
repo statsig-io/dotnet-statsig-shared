@@ -140,7 +140,7 @@ namespace StatsigShared.Network
                 ["events"] = snapshot
             };
 
-            await _dispatcher.Fetch("log_event", body, 5, 1);
+            await _dispatcher.FetchAsString("log_event", body, 5, 1);
         }
 
         public async Task Shutdown()
