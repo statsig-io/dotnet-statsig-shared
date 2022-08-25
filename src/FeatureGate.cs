@@ -13,7 +13,7 @@ namespace StatsigShared
         [JsonProperty("rule_id")]
         public string RuleID { get; }
         [JsonProperty("secondary_exposures")]
-        public List<IReadOnlyDictionary<string, string>> SecondaryExposures { get; }
+        public List<Dictionary<string, string>> SecondaryExposures { get; }
 
         static FeatureGate? _defaultConfig;
 
@@ -29,12 +29,12 @@ namespace StatsigShared
             }
         }
 
-        public FeatureGate(string? name = null, bool value = false, string? ruleID = null, List<IReadOnlyDictionary<string, string>>? secondaryExposures = null)
+        public FeatureGate(string? name = null, bool value = false, string? ruleID = null, List<Dictionary<string, string>>? secondaryExposures = null)
         {
             Name = name ?? "";
             Value = value;
             RuleID = ruleID ?? "";
-            SecondaryExposures = secondaryExposures ?? new List<IReadOnlyDictionary<string, string>>();
+            SecondaryExposures = secondaryExposures ?? new List<Dictionary<string, string>>();
         }
 
         public static FeatureGate? FromJObject(string name, JObject? jobj)
@@ -70,8 +70,8 @@ namespace StatsigShared
                     valueToken.Value<bool>(),
                     ruleToken.Value<string>(),
                     jobj.TryGetValue("secondary_exposures", out JToken? exposures)
-                        ? exposures.ToObject<List<IReadOnlyDictionary<string, string>>>()
-                        : new List<IReadOnlyDictionary<string, string>>()
+                        ? exposures.ToObject<List<Dictionary<string, string>>>()
+                        : new List<Dictionary<string, string>>()
                 );
             }
             catch

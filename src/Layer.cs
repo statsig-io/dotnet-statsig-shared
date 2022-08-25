@@ -15,13 +15,13 @@ namespace StatsigShared
         public string RuleID { get; }
 
         [JsonProperty("value")]
-        public IReadOnlyDictionary<string, JToken> Value { get; }
+        public Dictionary<string, JToken> Value { get; }
 
         [JsonProperty("secondary_exposures")]
-        public List<IReadOnlyDictionary<string, string>> SecondaryExposures;
+        public List<Dictionary<string, string>> SecondaryExposures;
 
         [JsonProperty("undelegated_secondary_exposures")]
-        public List<IReadOnlyDictionary<string, string>> UndelegatedSecondaryExposures;
+        public List<Dictionary<string, string>> UndelegatedSecondaryExposures;
 
         [JsonProperty("explicit_parameters")]
         public List<string> ExplicitParameters;
@@ -46,7 +46,7 @@ namespace StatsigShared
         }
 
         public Layer(string? name = null, 
-            IReadOnlyDictionary<string, JToken>? value = null, 
+            Dictionary<string, JToken>? value = null, 
             string? ruleID = null, 
             Action<Layer, string>? onExposure = null)
         {
@@ -54,8 +54,8 @@ namespace StatsigShared
             Value = value ?? new Dictionary<string, JToken>();
             RuleID = ruleID ?? "";
             OnExposure = onExposure ?? delegate { };
-            SecondaryExposures = new List<IReadOnlyDictionary<string, string>>();
-            UndelegatedSecondaryExposures = new List<IReadOnlyDictionary<string, string>>();
+            SecondaryExposures = new List<Dictionary<string, string>>();
+            UndelegatedSecondaryExposures = new List<Dictionary<string, string>>();
             ExplicitParameters = new List<string>();
             AllocatedExperimentName = "";
         }
@@ -101,8 +101,8 @@ namespace StatsigShared
                 );
 
                 layer.AllocatedExperimentName = GetFromJSON(jobj, "allocated_experiment_name", "");
-                layer.SecondaryExposures = GetFromJSON(jobj, "secondary_exposures", new List<IReadOnlyDictionary<string, string>>());
-                layer.UndelegatedSecondaryExposures = GetFromJSON(jobj, "undelegated_secondary_exposures", new List<IReadOnlyDictionary<string, string>>());
+                layer.SecondaryExposures = GetFromJSON(jobj, "secondary_exposures", new List<Dictionary<string, string>>());
+                layer.UndelegatedSecondaryExposures = GetFromJSON(jobj, "undelegated_secondary_exposures", new List<Dictionary<string, string>>());
                 layer.ExplicitParameters = GetFromJSON(jobj, "explicit_parameters", new List<string>());
 
                 return layer;

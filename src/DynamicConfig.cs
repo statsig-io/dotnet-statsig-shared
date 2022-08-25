@@ -17,7 +17,7 @@ namespace StatsigShared
         public string RuleID { get; }
 
         [JsonProperty("secondary_exposures")]
-        public List<IReadOnlyDictionary<string, string>> SecondaryExposures { get;  set; }
+        public List<Dictionary<string, string>> SecondaryExposures { get;  set; }
 
         static DynamicConfig? _defaultConfig;
 
@@ -37,12 +37,12 @@ namespace StatsigShared
             string? configName = null,
             IReadOnlyDictionary<string, JToken>? value = null,
             string? ruleID = null,
-            List<IReadOnlyDictionary<string, string>>? secondaryExposures = null)
+            List<Dictionary<string, string>>? secondaryExposures = null)
         {
             ConfigName = configName ?? "";
             Value = value ?? new Dictionary<string, JToken>();
             RuleID = ruleID ?? "";
-            SecondaryExposures = secondaryExposures ?? new List<IReadOnlyDictionary<string, string>>();
+            SecondaryExposures = secondaryExposures ?? new List<Dictionary<string, string>>();
         }
 
         public T? Get<T>(string key, T? defaultValue = default(T))
@@ -85,8 +85,8 @@ namespace StatsigShared
                     value,
                     ruleToken == null ? null : ruleToken.Value<string>(),
                     jobj.TryGetValue("secondary_exposures", out JToken? exposures)
-                        ? exposures.ToObject<List<IReadOnlyDictionary<string, string>>>()
-                        : new List<IReadOnlyDictionary<string, string>>()
+                        ? exposures.ToObject<List<Dictionary<string, string>>>()
+                        : new List<Dictionary<string, string>>()
                 );
             }
             catch
