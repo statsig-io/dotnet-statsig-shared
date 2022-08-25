@@ -11,7 +11,7 @@ namespace StatsigShared
         public string ConfigName { get; }
 
         [JsonProperty("value")]
-        public IReadOnlyDictionary<string, JToken> Value { get; }
+        public Dictionary<string, JToken> Value { get; }
 
         [JsonProperty("rule_id")]
         public string RuleID { get; }
@@ -35,7 +35,7 @@ namespace StatsigShared
 
         public DynamicConfig(
             string? configName = null,
-            IReadOnlyDictionary<string, JToken>? value = null,
+            Dictionary<string, JToken>? value = null,
             string? ruleID = null,
             List<Dictionary<string, string>>? secondaryExposures = null)
         {
