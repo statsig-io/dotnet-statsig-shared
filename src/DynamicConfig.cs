@@ -19,7 +19,7 @@ namespace StatsigShared
         [JsonProperty("secondary_exposures")]
         public List<Dictionary<string, string>> SecondaryExposures { get;  set; }
 
-        static DynamicConfig? _defaultConfig;
+        private static DynamicConfig _defaultConfig;
 
         public static DynamicConfig Default
         {
@@ -34,10 +34,10 @@ namespace StatsigShared
         }
 
         public DynamicConfig(
-            string? configName = null,
-            Dictionary<string, JToken>? value = null,
-            string? ruleID = null,
-            List<Dictionary<string, string>>? secondaryExposures = null)
+            string configName = null,
+            Dictionary<string, JToken> value = null,
+            string ruleID = null,
+            List<Dictionary<string, string>> secondaryExposures = null)
         {
             ConfigName = configName ?? "";
             Value = value ?? new Dictionary<string, JToken>();
@@ -45,9 +45,9 @@ namespace StatsigShared
             SecondaryExposures = secondaryExposures ?? new List<Dictionary<string, string>>();
         }
 
-        public T? Get<T>(string key, T? defaultValue = default(T))
+        public T Get<T>(string key, T defaultValue = default(T))
         {
-            JToken? outVal;
+            JToken outVal;
             if (!this.Value.TryGetValue(key, out outVal))
             {
                 return defaultValue;
@@ -66,15 +66,15 @@ namespace StatsigShared
             }
         }
 
-        public static DynamicConfig? FromJObject(string configName, JObject? jobj)
+        public static DynamicConfig FromJObject(string configName, JObject jobj)
         {
             if (jobj == null)
             {
                 return null;
             }
 
-            jobj.TryGetValue("rule_id", out JToken? ruleToken);
-            jobj.TryGetValue("value", out JToken? valueToken);
+            jobj.TryGetValue("rule_id", out JToken ruleToken);
+            jobj.TryGetValue("value", out JToken valueToken);
 
             try
             {

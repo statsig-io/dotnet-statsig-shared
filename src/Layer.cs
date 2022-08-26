@@ -8,30 +8,25 @@ namespace StatsigShared
 {
     public class Layer
     {
-        [JsonProperty("name")]
-        public string Name { get; }
+        [JsonProperty("name")] public string Name { get; }
 
-        [JsonProperty("rule_id")]
-        public string RuleID { get; }
+        [JsonProperty("rule_id")] public string RuleID { get; }
 
-        [JsonProperty("value")]
-        public Dictionary<string, JToken> Value { get; }
+        [JsonProperty("value")] public Dictionary<string, JToken> Value { get; }
 
-        [JsonProperty("secondary_exposures")]
-        public List<Dictionary<string, string>> SecondaryExposures;
+        [JsonProperty("secondary_exposures")] public List<Dictionary<string, string>> SecondaryExposures;
 
         [JsonProperty("undelegated_secondary_exposures")]
         public List<Dictionary<string, string>> UndelegatedSecondaryExposures;
 
-        [JsonProperty("explicit_parameters")]
-        public List<string> ExplicitParameters;
+        [JsonProperty("explicit_parameters")] public List<string> ExplicitParameters;
 
         [JsonProperty("allocated_experiment_name")]
         public string AllocatedExperimentName;
 
         public Action<Layer, string> OnExposure;
 
-        static Layer? _default;
+        private static Layer _default;
 
         public static Layer Default
         {
@@ -41,14 +36,15 @@ namespace StatsigShared
                 {
                     _default = new Layer();
                 }
+
                 return _default;
             }
         }
 
-        public Layer(string? name = null, 
-            Dictionary<string, JToken>? value = null, 
-            string? ruleID = null, 
-            Action<Layer, string>? onExposure = null)
+        public Layer(string name = null,
+            Dictionary<string, JToken> value = null,
+            string ruleID = null,
+            Action<Layer, string> onExposure = null)
         {
             Name = name ?? "";
             Value = value ?? new Dictionary<string, JToken>();
@@ -60,9 +56,9 @@ namespace StatsigShared
             AllocatedExperimentName = "";
         }
 
-        public T? Get<T>(string key, T? defaultValue = default(T))
+        public T Get<T>(string key, T defaultValue = default(T))
         {
-            JToken? outVal;
+            JToken outVal;
             if (!this.Value.TryGetValue(key, out outVal))
             {
                 return defaultValue;
@@ -83,7 +79,7 @@ namespace StatsigShared
             }
         }
 
-        public static Layer? FromJObject(string configName, JObject? jobj)
+        public static Layer FromJObject(string configName, JObject jobj)
         {
             if (jobj == null)
             {
@@ -101,8 +97,10 @@ namespace StatsigShared
                 );
 
                 layer.AllocatedExperimentName = GetFromJSON(jobj, "allocated_experiment_name", "");
-                layer.SecondaryExposures = GetFromJSON(jobj, "secondary_exposures", new List<Dictionary<string, string>>());
-                layer.UndelegatedSecondaryExposures = GetFromJSON(jobj, "undelegated_secondary_exposures", new List<Dictionary<string, string>>());
+                layer.SecondaryExposures =
+                    GetFromJSON(jobj, "secondary_exposures", new List<Dictionary<string, string>>());
+                layer.UndelegatedSecondaryExposures = GetFromJSON(jobj, "undelegated_secondary_exposures",
+                    new List<Dictionary<string, string>>());
                 layer.ExplicitParameters = GetFromJSON(jobj, "explicit_parameters", new List<string>());
 
                 return layer;
@@ -116,11 +114,12 @@ namespace StatsigShared
 
         private static T GetFromJSON<T>(JObject json, string key, T defaultValue)
         {
-            json.TryGetValue(key, out JToken? token);
+            json.TryGetValue(key, out JToken token);
             if (token == null)
             {
                 return defaultValue;
             }
+
             return token == null ? defaultValue : (token.ToObject<T>() ?? defaultValue);
         }
     }
