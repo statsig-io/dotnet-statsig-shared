@@ -1,4 +1,6 @@
 .DS_Store
+bin.meta
+obj.meta
 
 # Created by https://www.toptal.com/developers/gitignore/api/csharp,dotnetcore
 # Edit at https://www.toptal.com/developers/gitignore?templates=csharp,dotnetcore
